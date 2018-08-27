@@ -1,0 +1,23 @@
+
+% first vertical line
+lpsDefineObject(_, line, [
+  start(100, 60),
+  end(100, 270)
+]).
+
+% second vertical line
+lpsDefineObject(_, line, [
+  start(170, 60),
+  end(170, 270)
+]).
+
+% first horizontal line
+lpsDefineObject(_, line, [
+  start(30, 130),
+  end(240, 130)
+]).
+% second horizontal line
+lpsDefineObject(_, line, [
+  start(30, 200),
+  end(240, 200)
+]).

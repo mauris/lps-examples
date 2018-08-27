@@ -1,0 +1,25 @@
+gridPositions(0, 65, 95).
+gridPositions(1, 135, 95).
+gridPositions(2, 205, 95).
+
+gridPositions(3, 65, 165).
+gridPositions(4, 135, 165).
+gridPositions(5, 205, 165).
+
+gridPositions(6, 65, 235).
+gridPositions(7, 135, 235).
+gridPositions(8, 205, 235).
+
+% horizontal rows
+row(0, 1, 2).
+row(3, 4, 5).
+row(6, 7, 8).
+
+% vertical rows
+row(0, 3, 6).
+row(1, 4, 6).
+row(2, 5, 8).
+
+% diagonal rows
+row(0, 4, 8).
+row(2, 4, 6).

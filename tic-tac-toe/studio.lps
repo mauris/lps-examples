@@ -1,0 +1,194 @@
+/*
+  Authored by Sam Yong, Aug 2018
+  Run this file in LPS Studio.
+ */
+
+maxTime(5000).
+cycleInterval(200).
+
+loadModule(p2p).
+
+lpsLoadImage(cross, "./icons8-cross.png").
+lpsLoadImage(circle, "./icons8-circle.png").
+
+p2pJoin(tictactoe).
+
+action(updateSelfIdentifier(A)).
+action(showGridSquares).
+action(hideGridSquares).
+action(setOpponent/1).
+action(setGridState/2).
+event(startTurn/1).
+
+fluents([
+  gameState/1,
+  gridState/2,
+  selfIdentifier/1,
+  opponent/1
+]).
+
+% initialise none for all grids
+initially(gridState(GridId, none)) <-
+  gridPositions(GridId, _, _).
+
+initially([
+  gameState(connecting),
+  selfIdentifier(cross)
+]).
+
+consult('./auxiliary.lps').
+
+lpsDefineObject(ObjId, square, [
+  position(X, Y),
+  size(60, 60),
+  strokeWeight(0),
+  fillStyle('#EFEFEF'),
+  isHidden(1)
+]) <-
+  gridPositions(GridId, X, Y),
+  ObjId = 'gridSquare' + atom_string(GridId).
+
+showGridSquares(T1, T2),
+  gridPositions(GridId, _, _),
+  gridState(GridId, none, T2),
+  ObjId = 'gridSquare' + atom_string(GridId) ->
+    lpsUpdateObject(ObjId, [
+      isHidden(0)
+    ]).
+    
+hideGridSquares(T1, T2),
+  gridPositions(GridId, _, _),
+  ObjId = 'gridSquare' + atom_string(GridId) ->
+    lpsUpdateObject(ObjId, [
+      isHidden(1)
+    ]).
+    
+p2pPeerConnected(Network, Peer, T1, T2) ->
+  p2pSend(Network, Peer, newPlayer(circle)) from T2,
+  write('peer connected starting...'),
+  writeln(Peer),
+  setOpponent(Peer, T2, T3),
+  startTurn(cross, T2, T3).
+
+p2pReceive(Network, Peer, newPlayer(Id), T1, T2) -> 
+  updateSelfIdentifier(Id, T2, T3),
+  write('updating self identifier'),
+  writeln(Id),
+  setOpponent(Peer, T2, T3),
+  startTurn(cross, T3, T4).
+  
+startTurn(Player, T1, T2) <-
+  selfIdentifier(Id) at T1,
+  atom_string(Player) == atom_string(Id),
+  showGridSquares(T1, T2),
+  lpsUpdateObject(gameStatus, [
+    caption('It is your turn')
+  ]).
+
+startTurn(Player, T1, T2) <-
+  selfIdentifier(Id) at T1,
+  atom_string(Player) != atom_string(Id),
+  hideGridSquares(T1, T2),
+  lpsUpdateObject(gameStatus, [
+    caption('It is the opponent turn')
+  ]).
+
+hasWon at T <- 
+  row(X, Y, Z),
+  selfIdentifier(SelfId, T),
+  gridState(X, SelfId, T),
+  gridState(Y, SelfId, T),
+  gridState(Z, SelfId, T).
+
+hasLost at T <-
+  row(X, Y, Z),
+  selfIdentifier(SelfId, T),
+  gridState(X, OtherId, T),
+  gridState(Y, OtherId, T),
+  gridState(Z, OtherId, T),
+  atom_string(OtherId) != 'none',
+  atom_string(OtherId) != atom_string(SelfId).
+  
+hasDrawn at T <-
+  not(gridState(_, none, T)).
+
+checkGameState(SelfId) from T1 to T1 <-
+  hasWon at T1,
+  lpsUpdateObject(gameStatus, [
+    caption('You have won')
+  ]),
+  lpsHalt from T1.
+
+checkGameState(SelfId) from T1 to T1 <-
+  hasLost at T1,
+  lpsUpdateObject(gameStatus, [
+    caption('You have lost')
+  ]),
+  lpsHalt from T1.
+
+checkGameState(SelfId) from T1 to T1 <-
+  hasDrawn at T1,
+  lpsUpdateObject(gameStatus, [
+    caption('It is a draw.')
+  ]),
+  lpsHalt from T1.
+
+checkGameState(SelfId) from T1 to T2 <-
+  changeTurn(SelfId) from T1 to T2.
+
+changeTurn(SelfId) from T1 to T2 <-
+  SelfId == 'cross',
+  startTurn(circle, T1, T2).
+  
+changeTurn(SelfId) from T1 to T2 <-
+  SelfId == 'circle',
+  write(SelfId),
+  startTurn(cross, T1, T2).
+
+showObjectOnGrid(ObjId) at T1 <-
+  lpsUpdateObject(ObjId, [
+    size(1, 1),
+    isHidden(0)
+  ]) from T1,
+  lpsAnimateObject(ObjId, 400, [
+    size(64, 64)
+  ]) from T1.  
+
+% player makes a move
+lpsClick(Item, X, Y, T1, T2),
+  selfIdentifier(Id) at T2,
+  gridPositions(GridId, _, _),
+  GridSquareId = 'gridSquare' + atom_string(GridId),
+  atom_string(Item) == GridSquareId,
+  ObjId = atom_string(Id) + atom_string(GridId),
+  opponent(Peer) at T2 ->
+    p2pSend(tictactoe, Peer, move(ObjId, Id, GridId)) from T2,
+    showObjectOnGrid(ObjId) from T2,
+    setGridState(GridId, Id, T2, T3),
+    checkGameState(Id) from T3 to T4.
+
+p2pReceive(Network, Peer, move(ObjId, Id, GridId), T1, T2) ->
+  showObjectOnGrid(ObjId) from T2,
+  setGridState(GridId, Id, T2, T3),
+  checkGameState(Id) from T3 to T4.
+
+lpsDefineObject(_, text, [
+  position(10, 20),
+  caption('Icons by Icons8.com, CC-BY-ND 3.0'),
+  font('10px sans-serif')
+]).
+
+lpsDefineObject(gameStatus, text, [
+  position(10, 40),
+  caption('Waiting for network...'),
+  font('14px sans-serif')
+]).
+
+initiates(setOpponent(A), opponent(A)).
+updates(setGridState(GridId, Player), gridState(GridId, _), gridState(GridId, Player)).
+% updates(setOpponent(A), opponent(_), opponent(A)).
+updates(updateSelfIdentifier(A), selfIdentifier(_), selfIdentifier(A)).
+
+consult('./defineGrid.lps').
+consult('./pieces.lps', cross).
+consult('./pieces.lps', circle).
