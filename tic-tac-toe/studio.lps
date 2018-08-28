@@ -164,6 +164,10 @@ showObjectOnGrid(ObjId) at T1 <-
     size(64, 64)
   ]) from T1.
 
+updateGrid(ObjId, GridId, Id, T1, T2) <-
+  showObjectOnGrid(ObjId) from T1,
+  setGridState(GridId, Id, T1, T2).
+
 % player makes a move
 lpsClick(Item, X, Y, T1, T2),
   selfIdentifier(Id) at T2,
@@ -173,21 +177,14 @@ lpsClick(Item, X, Y, T1, T2),
   ObjId = atom_string(Id) + atom_string(GridId),
   opponent(Peer) at T2 ->
     p2pSend(tictactoe, Peer, move(ObjId, Id, GridId)) from T2,
-    showObjectOnGrid(ObjId) from T2,
-    setGridState(GridId, Id, T2, T3),
+    updateGrid(ObjId, GridId, Id, T2, T3),
     checkGameState(Id) from T3 to T4.
 
+% a move has been made by the opponent,
+% we need to update the current player's world view
 p2pReceive(Network, Peer, move(ObjId, Id, GridId), T1, T2) ->
-  showObjectOnGrid(ObjId) from T2,
-  setGridState(GridId, Id, T2, T3),
+  updateGrid(ObjId, GridId, Id, T2, T3),
   checkGameState(Id) from T3 to T4.
-
-% creative commons text for the icons
-lpsDefineObject(_, text, [
-  position(10, 20),
-  caption('Icons by Icons8.com, CC-BY-ND 3.0'),
-  font('10px sans-serif')
-]).
 
 % the game status to show the user
 lpsDefineObject(gameStatus, text, [
@@ -207,3 +204,10 @@ updates(updateSelfIdentifier(A), selfIdentifier(_), selfIdentifier(A)).
 consult('./defineGrid.lps').
 consult('./pieces.lps', cross).
 consult('./pieces.lps', circle).
+
+% creative commons text for the icons
+lpsDefineObject(_, text, [
+  position(10, 20),
+  caption('Icons by Icons8.com, CC-BY-ND 3.0'),
+  font('10px sans-serif')
+]).
