@@ -29,6 +29,7 @@ fluents([
 % initialise none for all grids
 initially(gridState(GridId, none)) <-
   gridPositions(GridId, _, _).
+% grids 0 - 8 have states 'none', 'cross' or 'circle'
 
 initially([
   selfIdentifier(cross)
@@ -53,24 +54,32 @@ showGridSquares(T1, T2),
     lpsUpdateObject(ObjId, [
       isHidden(0)
     ]).
-    
+
 hideGridSquares(T1, T2),
   gridPositions(GridId, _, _),
   ObjId = 'gridSquare' + atom_string(GridId) ->
     lpsUpdateObject(ObjId, [
       isHidden(1)
     ]).
-    
-p2pPeerConnected(Network, Peer, T1, T2) ->
-  p2pSend(Network, Peer, newPlayer(circle)) from T2,
-  setOpponent(Peer, T2, T3),
-  startTurn(cross, T2, T3).
 
-p2pReceive(Network, Peer, newPlayer(Id), T1, T2) -> 
-  updateSelfIdentifier(Id, T2, T3),
-  setOpponent(Peer, T2, T3),
-  startTurn(cross, T3, T4).
-  
+% another player is connected on the network
+% we make the second player to be "circle".
+% first player will remain as "cross"
+p2pPeerConnected(Network, Peer, T1, T2),
+  not opponent(_, T2) ->
+    p2pSend(Network, Peer, newPlayer(circle)) from T2,
+    setOpponent(Peer, T2, T3),
+    startTurn(cross, T2, T3).
+
+% another player has already entered first
+% i will update my own identifier to what
+% the first player decided for me to be.
+p2pReceive(Network, Peer, newPlayer(Id), T1, T2),
+  not opponent(_, T2) ->
+    updateSelfIdentifier(Id, T2, T3),
+    setOpponent(Peer, T2, T3),
+    startTurn(cross, T3, T4).
+
 startTurn(Player, T1, T2) <-
   selfIdentifier(Id) at T1,
   atom_string(Player) == atom_string(Id),
@@ -87,13 +96,15 @@ startTurn(Player, T1, T2) <-
     caption('It is the opponent turn')
   ]).
 
-hasWon at T <- 
+% check for a win condition
+hasWon at T <-
   row(X, Y, Z),
   selfIdentifier(SelfId, T),
   gridState(X, SelfId, T),
   gridState(Y, SelfId, T),
   gridState(Z, SelfId, T).
 
+% check for a lose condition
 hasLost at T <-
   row(X, Y, Z),
   selfIdentifier(SelfId, T),
@@ -102,10 +113,14 @@ hasLost at T <-
   gridState(Z, OtherId, T),
   atom_string(OtherId) != 'none',
   atom_string(OtherId) != atom_string(SelfId).
-  
+
+% check for a draw condition
 hasDrawn at T <-
   not(gridState(_, none, T)).
 
+% checkGameStatus/1 will determine if the game
+% has met any of the end conditions, or otherwise
+% continue with the game by running changeTurn/1
 checkGameState(SelfId) from T1 to T1 <-
   hasWon at T1,
   lpsUpdateObject(gameStatus, [
@@ -127,13 +142,14 @@ checkGameState(SelfId) from T1 to T1 <-
   ]),
   lpsHalt from T1.
 
+%
 checkGameState(SelfId) from T1 to T2 <-
   changeTurn(SelfId) from T1 to T2.
 
 changeTurn(SelfId) from T1 to T2 <-
   SelfId == 'cross',
   startTurn(circle, T1, T2).
-  
+
 changeTurn(SelfId) from T1 to T2 <-
   SelfId == 'circle',
   write(SelfId),
@@ -146,7 +162,7 @@ showObjectOnGrid(ObjId) at T1 <-
   ]) from T1,
   lpsAnimateObject(ObjId, 400, [
     size(64, 64)
-  ]) from T1.  
+  ]) from T1.
 
 % player makes a move
 lpsClick(Item, X, Y, T1, T2),
@@ -166,21 +182,26 @@ p2pReceive(Network, Peer, move(ObjId, Id, GridId), T1, T2) ->
   setGridState(GridId, Id, T2, T3),
   checkGameState(Id) from T3 to T4.
 
+% creative commons text for the icons
 lpsDefineObject(_, text, [
   position(10, 20),
   caption('Icons by Icons8.com, CC-BY-ND 3.0'),
   font('10px sans-serif')
 ]).
 
+% the game status to show the user
 lpsDefineObject(gameStatus, text, [
   position(10, 40),
   caption('Waiting for network...'),
   font('14px sans-serif')
 ]).
 
+% set the opponent's peer ID for use by p2p
 initiates(setOpponent(A), opponent(A)).
+
+% update the knowledge about a particular square on the grid
 updates(setGridState(GridId, Player), gridState(GridId, _), gridState(GridId, Player)).
-% updates(setOpponent(A), opponent(_), opponent(A)).
+
 updates(updateSelfIdentifier(A), selfIdentifier(_), selfIdentifier(A)).
 
 consult('./defineGrid.lps').
