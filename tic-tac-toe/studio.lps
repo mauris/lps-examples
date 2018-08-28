@@ -21,7 +21,6 @@ action(setGridState/2).
 event(startTurn/1).
 
 fluents([
-  gameState/1,
   gridState/2,
   selfIdentifier/1,
   opponent/1
@@ -32,7 +31,6 @@ initially(gridState(GridId, none)) <-
   gridPositions(GridId, _, _).
 
 initially([
-  gameState(connecting),
   selfIdentifier(cross)
 ]).
 
