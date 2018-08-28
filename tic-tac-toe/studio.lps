@@ -147,13 +147,11 @@ checkGameState(SelfId) from T1 to T1 <-
 checkGameState(SelfId) from T1 to T2 <-
   changeTurn(SelfId) from T1 to T2.
 
-changeTurn(SelfId) from T1 to T2 <-
-  SelfId == 'cross',
+% change turn changes the turn for the player
+changeTurn(cross) from T1 to T2 <-
   startTurn(circle, T1, T2).
 
-changeTurn(SelfId) from T1 to T2 <-
-  SelfId == 'circle',
-  write(SelfId),
+changeTurn(circle) from T1 to T2 <-
   startTurn(cross, T1, T2).
 
 showObjectOnGrid(ObjId) at T1 <-
