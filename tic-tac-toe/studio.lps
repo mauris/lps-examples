@@ -65,15 +65,11 @@ hideGridSquares(T1, T2),
     
 p2pPeerConnected(Network, Peer, T1, T2) ->
   p2pSend(Network, Peer, newPlayer(circle)) from T2,
-  write('peer connected starting...'),
-  writeln(Peer),
   setOpponent(Peer, T2, T3),
   startTurn(cross, T2, T3).
 
 p2pReceive(Network, Peer, newPlayer(Id), T1, T2) -> 
   updateSelfIdentifier(Id, T2, T3),
-  write('updating self identifier'),
-  writeln(Id),
   setOpponent(Peer, T2, T3),
   startTurn(cross, T3, T4).
   
