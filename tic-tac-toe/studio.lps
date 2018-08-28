@@ -142,7 +142,8 @@ checkGameState(SelfId) from T1 to T1 <-
   ]),
   lpsHalt from T1.
 
-%
+% none of the end-game conditions have been met.
+% continue with the next turn
 checkGameState(SelfId) from T1 to T2 <-
   changeTurn(SelfId) from T1 to T2.
 
