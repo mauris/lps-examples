@@ -1,9 +1,7 @@
 lpsDefineObject(ObjId, image, [
   position(X, Y),
   size(64, 64),
-  image(PID),
   isHidden(1)
 ]) <-
-  processId(PID),
   gridPositions(GridId, X, Y),
-  ObjId = atom_string(PID) + atom_string(GridId).
+  ObjId = 'square' + atom_string(GridId).
