@@ -95,13 +95,23 @@ startTurn(Player, T1, T2) <-
     caption('It is the opponent turn')
   ]).
 
+drawWinLine(A, B) <-
+  gridPositions(A, X1, Y1),
+  gridPositions(B, X2, Y2),
+  lpsUpdateObject(winLine, [
+    start(X1, Y1),
+    end(X2, Y2),
+    isHidden(0)
+  ]).
+
 % check for a win condition
 hasWon at T <-
   row(X, Y, Z),
   selfIdentifier(SelfId, T),
   gridState(X, SelfId, T),
   gridState(Y, SelfId, T),
-  gridState(Z, SelfId, T).
+  gridState(Z, SelfId, T),
+  drawWinLine(X, Z).
 
 % check for a lose condition
 hasLost at T <-
@@ -111,7 +121,8 @@ hasLost at T <-
   gridState(Y, OtherId, T),
   gridState(Z, OtherId, T),
   atom_string(OtherId) != 'none',
-  atom_string(OtherId) != atom_string(SelfId).
+  atom_string(OtherId) != atom_string(SelfId),
+  drawWinLine(X, Z).
 
 % check for a draw condition
 hasDrawn at T <-
@@ -208,4 +219,12 @@ lpsDefineObject(_, text, [
   position(10, 20),
   caption('Icons by Icons8.com, CC-BY-ND 3.0'),
   font('10px sans-serif')
+]).
+
+lpsDefineObject(winLine, line, [
+  start(0, 0),
+  end(0, 0),
+  strokeWeight(5),
+  strokeStyle('#A00'),
+  isHidden(1)
 ]).
