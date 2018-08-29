@@ -13,33 +13,58 @@ startTurn(Turn, T1, T2),
     selectionStrategy(Choice) at T3,
     select(Choice, T3, T4).
 
-selectionStrategy(Choice) at T <-
+% Actively tries to the opponent from winning
+% or move towards a win condition
+selectionStrategy(X) at T <-
   row(X, Y, Z),
   gridState(X, none, T),
   gridState(Y, Player, T),
   gridState(Z, Player, T),
-  Player != none,
-  Choice = X.
+  atom_string(Player) != 'none'.
 
-selectionStrategy(Choice) at T <-
+selectionStrategy(Y) at T <-
   row(X, Y, Z),
   gridState(X, Player, T),
   gridState(Y, none, T),
   gridState(Z, Player, T),
-  Player != none,
-  Choice = Y.
+  atom_string(Player) != 'none'.
 
-selectionStrategy(Choice) at T <-
+selectionStrategy(Z) at T <-
   row(X, Y, Z),
   gridState(X, Player, T),
   gridState(Y, Player, T),
   gridState(Z, none, T),
-  Player != none,
-  Choice = Z.
+  atom_string(Player) != 'none'.
 
+% bias for center
+selectionStrategy(4) at T <-
+  gridState(4, none, T).
+
+% bias for corners
+selectionStrategy(I) at T <-
+  member(I, [0, 2, 6, 8]),
+  gridState(I, none, T).
+
+% bias for blocking or advancing
+selectionStrategy(Y) at T <-
+  row(X, Y, Z),
+  gridState(X, none, T),
+  gridState(Y, none, T),
+  gridState(Z, Player, T),
+  atom_string(Player) != 'none'.
+
+selectionStrategy(Y) at T <-
+  row(X, Y, Z),
+  gridState(X, Player, T),
+  gridState(Y, none, T),
+  gridState(Z, none, T),
+  atom_string(Player) != 'none'.
+
+% any remaining possible moves
 selectionStrategy(Choice) at T <-
   gridState(Choice, none, T).
 
+% perform a selection
 select(GridId, T1, T2),
   selfIdentifier(Id) at T2,
   ObjId = 'square' + atom_string(GridId),
