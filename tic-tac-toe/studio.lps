@@ -69,7 +69,7 @@ p2pPeerConnected(Network, Peer, T1, T2),
   not opponent(_, T2) ->
     p2pSend(Network, Peer, newPlayer(circle)) from T2,
     setOpponent(Peer, T2, T3),
-    startTurn(cross, T2, T3).
+    startTurn(cross, T3, T4).
 
 % another player has already entered first
 % i will update my own identifier to what
