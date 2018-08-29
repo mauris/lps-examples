@@ -1,0 +1,55 @@
+consult('./studio.lps').
+action(select(Item)).
+
+lpsDefineObject(_, text, [
+  position(10, 300),
+  caption('I am the bot player.'),
+  font('10px sans-serif')
+]).
+
+startTurn(Turn, T1, T2),
+  selfIdentifier(Id, T2),
+  atom_string(Turn) == atom_string(Id) ->
+    selectionStrategy(Choice) at T3,
+    select(Choice, T3, T4).
+
+selectionStrategy(Choice) at T <-
+  row(X, Y, Z),
+  gridState(X, none, T),
+  gridState(Y, Player, T),
+  gridState(Z, Player, T),
+  Player != none,
+  Choice = X,
+  write('Choosing '),
+  writeln(Choice).
+
+selectionStrategy(Choice) at T <-
+  row(X, Y, Z),
+  gridState(X, Player, T),
+  gridState(Y, none, T),
+  gridState(Z, Player, T),
+  Player != none,
+  Choice = Y,
+  write('Choosing '),
+  writeln(Choice).
+
+selectionStrategy(Choice) at T <-
+  row(X, Y, Z),
+  gridState(X, Player, T),
+  gridState(Y, Player, T),
+  gridState(Z, none, T),
+  Player != none,
+  Choice = Z,
+  write('Choosing '),
+  writeln(Choice).
+
+selectionStrategy(Choice) at T <-
+  gridState(Choice, none, T).
+
+select(GridId, T1, T2),
+  selfIdentifier(Id) at T2,
+  ObjId = 'square' + atom_string(GridId),
+  opponent(Peer) at T2 ->
+    p2pSend(tictactoe, Peer, move(ObjId, Id, GridId)) from T2,
+    updateGrid(ObjId, GridId, Id, T2, T3),
+    checkGameState(Id) from T3 to T4.
