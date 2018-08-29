@@ -80,9 +80,8 @@ p2pReceive(Network, Peer, newPlayer(Id), T1, T2),
     setOpponent(Peer, T2, T3),
     startTurn(cross, T3, T4).
 
-startTurn(Player, T1, T2) <-
+startTurn(Id, T1, T2) <-
   selfIdentifier(Id) at T1,
-  atom_string(Player) == atom_string(Id),
   showGridSquares(T1, T2),
   lpsUpdateObject(gameStatus, [
     caption('It is your turn')
