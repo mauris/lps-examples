@@ -49,18 +49,14 @@ lpsDefineObject(ObjId, square, [
 
 showGridSquares(T1, T2),
   gridPositions(GridId, _, _),
-  gridState(GridId, none, T2),
+  gridState(GridId, none, T2), % only show non-filled squares
   ObjId = 'gridSquare' + atom_string(GridId) ->
-    lpsUpdateObject(ObjId, [
-      isHidden(0)
-    ]).
+    lpsShowObject(ObjId) from T2.
 
 hideGridSquares(T1, T2),
   gridPositions(GridId, _, _),
   ObjId = 'gridSquare' + atom_string(GridId) ->
-    lpsUpdateObject(ObjId, [
-      isHidden(1)
-    ]).
+    lpsHideObject(ObjId) from T2.
 
 % another player is connected on the network
 % we make the second player to be "circle".
