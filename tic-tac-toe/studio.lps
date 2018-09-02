@@ -63,17 +63,20 @@ hideGridSquares(T1, T2),
 % first player will remain as "cross"
 p2pPeerConnected(Network, Peer, T1, T2),
   not opponent(_, T2) ->
-    p2pSend(Network, Peer, newPlayer(circle)) from T2 to T4,
-    setOpponent(Peer, T4, T5),
-    startTurn(cross, T5, T6).
+    p2pSend(Network, Peer, newPlayer(circle)) from T2 to T4, % inform the opponent
+    setOpponent(Peer, T4, T5), % take note of opponent's network address
+    startTurn(cross, T5, T6). % start the game
 
 % another player has already entered first
 % i will update my own identifier to what
 % the first player decided for me to be.
 p2pReceive(Network, Peer, newPlayer(Id), T1, T2),
   not opponent(_, T2) ->
-    updateSelfIdentifier(Id) from T3 to T4,
-    setOpponent(Peer, T4, T5),
+    updateSelfIdentifier(Id) from T3 to T4, % update own ID
+    setOpponent(Peer, T4, T5), % take note of opponent's network address
+    lpsUpdateObject(playerSymbol, [
+      image(Id) % update player symbol
+    ]) at T3,
     startTurn(cross, T5, T6).
 
 startTurn(Id, T1, T2) <-
@@ -131,22 +134,22 @@ checkGameState(SelfId) from T1 to T1 <-
   hasWon at T1,
   lpsUpdateObject(gameStatus, [
     caption('You have won')
-  ]),
+  ]) at T1,
   lpsHalt from T1.
 
 checkGameState(SelfId) from T1 to T1 <-
   hasLost at T1,
   lpsUpdateObject(gameStatus, [
     caption('You have lost')
-  ]),
+  ]) at T1,
   lpsHalt from T1.
 
-checkGameState(SelfId) from T1 to T3 <-
+checkGameState(SelfId) from T1 to T2 <-
   hasDrawn at T1,
   lpsUpdateObject(gameStatus, [
     caption('It is a draw.')
-  ]) from T1 to T2,
-  lpsHalt from T2 to T3.
+  ]) from T1,
+  lpsHalt from T1 to T2.
 
 % none of the end-game conditions have been met.
 % continue with the next turn
@@ -196,7 +199,20 @@ p2pReceive(Network, Peer, move(ObjId, Id, GridId), T1, T2) ->
 lpsDefineObject(gameStatus, text, [
   position(10, 40),
   caption('Waiting for network...'),
-  font('14px sans-serif')
+  font('14px \'PT Sans\', sans-serif')
+]).
+
+
+lpsDefineObject(_, text, [
+  position(330, 40),
+  caption('You\'re playing as'),
+  font('9px Helvetica, sans-serif')
+]).
+
+lpsDefineObject(playerSymbol, image, [
+  position(340, 64),
+  size(32, 32),
+  image(cross)
 ]).
 
 % set the opponent's peer ID for use by p2p
@@ -213,8 +229,8 @@ consult('./pieces.lps').
 % creative commons text for the icons
 lpsDefineObject(_, text, [
   position(10, 20),
-  caption('Icons by Icons8.com, CC-BY-ND 3.0'),
-  font('10px sans-serif')
+  caption('Program authored by Sam Yong. Icons by Icons8.com, CC-BY-ND 3.0'),
+  font('9px Helvetica, sans-serif')
 ]).
 
 lpsDefineObject(winLine, line, [
