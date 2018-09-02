@@ -1,5 +1,5 @@
-action(moveCloudForward).
-action(moveCloudBackward).
+action(moveCloudForward/1).
+action(moveCloudBackward/1).
 
 cloudPosition(cloud1, 100, 100).
 cloudPosition(cloud2, 160, 120).
@@ -19,21 +19,22 @@ lpsDefineObject(C, image, [
 ]) <-
   cloudPosition(C, X, Y).
 
-true -> moveCloudForward(T1, T2).
+cloudPosition(C, X, Y) ->
+  moveCloudForward(C, T1, T2).
 
-cloudPosition(C, X, Y),
-  moveCloudForward(T1, T2) ->
-    Cycles = 20,
-    cycleInterval(CT),
-    randomInt(10, 50, R),
-    lpsAnimateMoveObject(C, CT * Cycles, X + R, Y) from T2 to T3,
-    T4 = T2 + Cycles,
-    moveCloudBackward(T4, T5).
+moveCloudForward(C, T1, T2) ->
+  cloudPosition(C, X, Y),
+  Cycles = 20,
+  cycleInterval(CT),
+  randomInt(10, 50, R),
+  lpsAnimateMoveObject(C, CT * Cycles, X + R, Y) from T2 to T3,
+  T4 = T2 + Cycles,
+  moveCloudBackward(C, T4, T5).
 
-cloudPosition(C, X, Y),
-  moveCloudBackward(T1, T2) ->
-    Cycles = 25,
-    cycleInterval(CT),
-    lpsAnimateMoveObject(C, CT * Cycles, X, Y) from T2 to T3,
-    T4 = T2 + Cycles,
-    moveCloudForward(T4, T5).
+moveCloudBackward(C, T1, T2) ->
+  cloudPosition(C, X, Y),
+  Cycles = 25,
+  cycleInterval(CT),
+  lpsAnimateMoveObject(C, CT * Cycles, X, Y) from T2 to T3,
+  T4 = T2 + Cycles,
+  moveCloudForward(C, T4, T5).
