@@ -1,0 +1,25 @@
+lpsLoadImage(ambulance, './images/icons8-ambulance-64.png').
+lpsLoadImage(fireHydrant1, './images/icons8-city-fire-hydrant-64.png').
+lpsLoadImage(fireHydrant2, './images/icons8-fire-hydrant-64.png').
+lpsLoadImage(hospital, './images/icons8-clinic-64.png').
+lpsLoadImage(clouds, './images/icons8-clouds-64.png').
+
+lpsLoadImage(fence1, './images/icons8-fence-64.png').
+lpsLoadImage(fence2, './images/icons8-house-fence-64.png').
+
+lpsLoadImage(fireStation, './images/icons8-fire-station-64.png').
+lpsLoadImage(fireTruck, './images/icons8-fire-truck-64.png').
+lpsLoadImage(fire, './images/icons8-gas-industry-64.png').
+
+lpsLoadImage(trees1, './images/icons8-forest-64.png').
+lpsLoadImage(trees2, './images/icons8-greenery-64.png').
+lpsLoadImage(trees3, './images/icons8-oak-tree-64.png').
+lpsLoadImage(trees4, './images/icons8-tree-64.png').
+
+lpsLoadImage(home1, './images/icons8-home-64.png').
+lpsLoadImage(home2, './images/icons8-home-page-64.png').
+
+lpsLoadImage(shop1, './images/icons8-shop-department-64.png').
+lpsLoadImage(shop2, './images/icons8-small-business-64.png').
+lpsLoadImage(commercial, './images/icons8-skyscrapers-64.png').
+lpsLoadImage(campus, './images/icons8-university-campus-64.png').

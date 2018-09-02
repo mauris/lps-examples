@@ -1,0 +1,107 @@
+% load main program
+consult('./loadImages.lps').
+consult('./animatingClouds.lps').
+consult('./town.lps').
+% consult('./roads.lps').
+consult('./fireTruck.lps').
+
+cycleInterval(200).
+maxTime(50000).
+
+lpsDefineObject(_, text, [
+  position(10, 20),
+  caption('Program authored by Sam Yong. Icons by Icons8.com, CC BY-ND 3.0'),
+  font('9px sans-serif')
+]).
+
+lpsClick(I, X, Y, T1, T2),
+  not fire(I, T2),
+  flammable(I) ->
+    ignite(I, T3, T4).
+
+ignite(I, T1, T2) ->
+  FireObjId = atom_string(I) + 'Fire',
+  lpsUpdateObject(FireObjId, [
+    isHidden(0)
+  ]).
+
+extinguish(I, T1, T2) ->
+  FireObjId = atom_string(I) + 'Fire',
+  lpsUpdateObject(FireObjId, [
+    isHidden(1)
+  ]).
+
+action(ignite/1).
+action(extinguish/1).
+fluent(fire/1).
+
+initiates(ignite(Building), fire(Building)).
+terminates(extinguish(Building), fire(Building)).
+
+%
+% deployFirefighters(T1, T2) ->
+%   lpsShowObject(fireTruck) from T2.
+%
+% % when moving firefighter, move fire truck
+% moveFirefightersTo(Item, T1, T2) ->
+%   positionItem(Item, X, Y),
+%   lpsAnimateMoveObject(fireTruck, 800, X, Y).
+%
+% location(Current, T1),
+%   fireTruckDirection(Dir, T1),
+%   moveFirefightersTo(Item, T1, T2) ->
+%     positionItem(Current, X1, _),
+%     positionItem(Item, X, Y),
+%     checkTruckFlipNeeded(X1, X, Dir, T3, T4),
+%     lpsAnimateMoveObject(fireTruck, 800, X, Y) from T4.
+%
+% checkTruckFlipNeeded(X1, X2, Dir, T1, T2) <-
+%   X1 < X2,
+%   Dir == left,
+%   changeDirection(T1, T2),
+%   lpsUpdateObject(fireTruck, [
+%     flipHorizontal(0)
+%   ]) from T1 to T2.
+%
+% checkTruckFlipNeeded(X1, X2, Dir, T1, T2) <-
+%   X1 >= X2,
+%   Dir == left.
+%
+% checkTruckFlipNeeded(X1, X2, Dir, T1, T2) <-
+%   X1 > X2,
+%   Dir == right,
+%   changeDirection(T1, T2),
+%   lpsUpdateObject(fireTruck, [
+%     flipHorizontal(1)
+%   ]) from T1 to T2.
+%
+% checkTruckFlipNeeded(X1, X2, Dir, T1, T2) <-
+%   X1 <= X2,
+%   Dir == right.
+%
+% % animate return to station
+% location(Current, T1),
+%   fireTruckDirection(Dir, T1),
+%   returnToStation(T1, T2) ->
+%     positionItem(Current, X1, _),
+%     positionItem(fireStation, X, Y),
+%     checkTruckFlipNeeded(X1, X, Dir, T2, T3),
+%     lpsAnimateMoveObject(fireTruck, 800, X, Y) from T3 to T4,
+%     lpsHideObject(fireTruck) from T4.
+%
+% % show fire when ignited
+% ignite(sofa, T1, T2) ->
+%   lpsShowObject(sofaFire) from T2.
+% ignite(grill, T1, T2) ->
+%   lpsShowObject(grillFire) from T2.
+%
+% % hide fire when put out
+% putOutFire(sofa, T1, T2) ->
+%   lpsHideObject(sofaFire) from T2.
+% putOutFire(grill, T1, T2) ->
+%   lpsHideObject(grillFire) from T2.
+%
+% updates(changeDirection, fireTruckDirection(_), fireTruckDirection(left)) <-
+%   fireTruckDirection(right, _).
+% updates(changeDirection, fireTruckDirection(_), fireTruckDirection(right)) <-
+%   fireTruckDirection(left, _).

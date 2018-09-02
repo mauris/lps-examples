@@ -1,0 +1,172 @@
+
+
+% first row horizontal roads
+roadEdge(200, 364, 264, 364).
+roadEdge(264, 364, 328, 364).
+roadEdge(328, 364, 392, 364).
+roadEdge(392, 364, 456, 364).
+roadEdge(456, 364, 520, 364).
+% roadEdge(520, 364, 584, 364).
+% roadEdge(584, 364, 648, 364).
+% roadEdge(648, 364, 712, 364).
+% roadEdge(712, 364, 776, 364).
+% roadEdge(776, 364, 840, 364).
+
+% roadEdge(200, 332, 200, 364).
+% roadEdge(264, 332, 264, 364).
+% roadEdge(328, 332, 328, 364).
+% roadEdge(392, 332, 392, 364).
+% roadEdge(456, 332, 456, 364).
+% roadEdge(520, 332, 520, 364).
+% roadEdge(584, 332, 584, 364).
+% roadEdge(648, 332, 648, 364).
+% roadEdge(712, 332, 712, 364).
+% roadEdge(776, 332, 776, 364).
+% roadEdge(840, 332, 840, 364).
+
+% right side vertical road
+% roadEdge(840, 364, 904, 364).
+% roadEdge(904, 364, 904, 492).
+
+% left side vertical road
+% roadEdge(136, 364, 200, 364).
+% roadEdge(136, 364, 136, 492).
+
+% second row horizontal roads
+% roadEdge(200, 492, 264, 492).
+% roadEdge(264, 492, 328, 492).
+% roadEdge(328, 492, 392, 492).
+% roadEdge(392, 492, 456, 492).
+% roadEdge(456, 492, 520, 492).
+% roadEdge(520, 492, 584, 492).
+% roadEdge(584, 492, 648, 492).
+% roadEdge(648, 492, 712, 492).
+% roadEdge(712, 492, 776, 492).
+% roadEdge(776, 492, 840, 492).
+
+% roadEdge(200, 460, 200, 492).
+% roadEdge(264, 460, 264, 492).
+% roadEdge(328, 460, 328, 492).
+% roadEdge(392, 460, 392, 492).
+% roadEdge(456, 460, 456, 492).
+% roadEdge(520, 460, 520, 492).
+% roadEdge(584, 460, 584, 492).
+% roadEdge(648, 460, 648, 492).
+% roadEdge(712, 460, 712, 492).
+% roadEdge(776, 460, 776, 492).
+% roadEdge(840, 460, 840, 492).
+
+% right side vertical road
+% roadEdge(840, 492, 904, 492).
+% roadEdge(904, 492, 904, 620).
+%
+% left side vertical road
+% roadEdge(136, 492, 200, 492).
+% roadEdge(136, 492, 136, 620).
+
+% third row horizontal roads
+% roadEdge(200, 620, 264, 620).
+% roadEdge(264, 620, 328, 620).
+% roadEdge(328, 620, 392, 620).
+% roadEdge(392, 620, 456, 620).
+% roadEdge(456, 620, 520, 620).
+% roadEdge(520, 620, 584, 620).
+% roadEdge(584, 620, 648, 620).
+% roadEdge(648, 620, 712, 620).
+% roadEdge(712, 620, 776, 620).
+% roadEdge(776, 620, 840, 620).
+%
+% roadEdge(200, 588, 200, 620).
+% roadEdge(264, 588, 264, 620).
+% roadEdge(328, 588, 328, 620).
+% roadEdge(392, 588, 392, 620).
+% roadEdge(456, 588, 456, 620).
+% roadEdge(520, 588, 520, 620).
+% roadEdge(584, 588, 584, 620).
+% roadEdge(648, 588, 648, 620).
+% roadEdge(712, 588, 712, 620).
+% roadEdge(776, 588, 776, 620).
+% roadEdge(840, 588, 840, 620).
+%
+% roadEdge(136, 620, 200, 620).
+% roadEdge(840, 620, 904, 620).
+
+path(X, Y, X, Y, []).
+path(StartX, StartY, EndX, EndY, P) <-
+  Choices = [[StartX, StartY]],
+  walk(Choices, EndX, EndY, [], [], P),
+  writeln(P).
+
+quicksort([X|Xs], Ys, Tx, Ty) <-
+  partition(Xs, X, Left, Right, Tx, Ty),
+  quicksort(Left, Ls, Tx, Ty),
+  quicksort(Right, Rs, Tx, Ty),
+  append(Ls, [X|Rs], Ys).
+
+quicksort([], [], _, _).
+
+partition([[X1, Y1]|Xs], [X2, Y2], L, Rs, Tx, Ty) <-
+    isNearer(X1, Y1, X2, Y2, Tx, Ty),
+    partition(Xs, [X2, Y2], Ls, Rs, Tx, Ty),
+    append([[X1, Y1]], Ls, L).
+
+partition([[X1, Y1]|Xs], [X2, Y2], Ls, R, Tx, Ty) <-
+    not isNearer(X1, Y1, X2, Y2, Tx, Ty),
+    partition(Xs, [X2, Y2], Ls, Rs, Tx, Ty),
+    append([[X1, Y1]], Rs, R).
+
+partition([], Y, [], [], _, _).
+
+isNearer(X1, Y1, X2, Y2, Tx, Ty) <-
+  pow(X1 - Tx, 2) + pow(Y1 - Ty, 2) < pow(X2 - Tx, 2) + pow(Y2 - Ty, 2).
+
+findAllChoices(X1, Y1, L) <-
+  findall([Tx, Ty], roadEdge(X1, Y1, Tx, Ty), L1),
+  findall([Tx, Ty], roadEdge(Tx, Ty, X1, Y1), L2),
+  append(L1, L2, L).
+
+walk([[X1, Y1]|RestChoices], X2, Y2, Visited, PathSoFar, PathResult) <-
+  hasVisited(X1, Y1, Visited),
+  equalOrWalk(RestChoices, X2, Y2, Visited, PathSoFar, PathResult).
+
+walk([[X1, Y1]|RestChoices], X2, Y2, Visited, PathSoFar, PathResult) <-
+  not hasVisited(X1, Y1, Visited),
+  append(PathSoFar, [[X1, Y1]], NewPathSoFar),
+  findAllChoices(X1, Y1, CurrentChoices),
+  append(RestChoices, CurrentChoices, AllChoices),
+  writeln(AllChoices),
+  quicksort(AllChoices, SortedChoices, X2, Y2),
+  Identifier = X1 + "-" + Y1,
+  equalOrWalk(SortedChoices, X2, Y2, [Identifier|Visited], NewPathSoFar, PathResult).
+
+hasVisited(X, Y, Visited) <-
+  Identifier = X +"-"+ Y,
+  member(Identifier, Visited).
+
+equalOrWalk([[X1, Y1]|_], X2, Y2, _, P, P) <-
+  X1 == X2,
+  Y1 == Y2.
+equalOrWalk(NewChoices, X2, Y2, Visited, PathSoFar, PathResult) <-
+  walk(NewChoices, X2, Y2, Visited, PathSoFar, PathResult).
+
+
+% drive ways
+% roadEdge(X, Y1, X, Y2) <-
+%   townPosition(_, _, X, Y),
+%   generateOrEqual(Y1, Y + 64),
+%   generateOrEqual(Y2, Y + 32).
+
+generateOrEqual(X, Y) <-
+  is_variable(X),
+  X = Y.
+
+generateOrEqual(X, Y) <-
+  not is_variable(X),
+  X == Y.
+
+lpsDefineObject(_, line, [
+  start(X1, Y1),
+  end(X2, Y2),
+  strokeStyle('#CCC')
+]) <-
+  roadEdge(X1, Y1, X2, Y2).

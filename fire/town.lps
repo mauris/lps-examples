@@ -1,0 +1,81 @@
+townPosition(fireStation, fireStation, 200, 300).
+townPosition(house2, home1, 264, 300).
+townPosition(house3, home2, 328, 300).
+townPosition(shop1, shop1, 392, 300).
+townPosition(shop2, shop1, 456, 300).
+townPosition(shop3, shop2, 520, 300).
+townPosition(tree1, trees1, 584, 300).
+townPosition(tree2, trees2, 648, 300).
+townPosition(school1, campus, 712, 300).
+townPosition(house3, home2, 776, 300).
+townPosition(house4, home1, 840, 300).
+
+% townPosition(house5, home1, 200, 428).
+% townPosition(shop4, shop2, 264, 428).
+% townPosition(tree3, trees3, 328, 428).
+% townPosition(tree4, trees4, 392, 428).
+% townPosition(tree5, trees1, 456, 428).
+% townPosition(office1, commercial, 520, 428).
+% townPosition(office2, commercial, 584, 428).
+% townPosition(office3, commercial, 648, 428).
+% townPosition(tree6, trees1, 712, 428).
+% townPosition(tree7, trees2, 776, 428).
+% townPosition(house6, home1, 840, 428).
+
+% townPosition(house7, home2, 200, 556).
+% townPosition(shop5, shop1, 264, 556).
+% townPosition(hospital, hospital, 328, 556).
+% townPosition(tree8, trees2, 392, 556).
+% townPosition(tree9, trees3, 456, 556).
+% townPosition(school2, campus, 520, 556).
+% townPosition(house8, home2, 584, 556).
+% townPosition(house9, home2, 648, 556).
+% townPosition(tree8, trees2, 712, 556).
+% townPosition(house10, home2, 776, 556).
+% townPosition(house11, home1, 840, 556).
+
+lpsDefineObject(ObjId, image, [
+  position(X, Y),
+  size(64, 64),
+  image(ImageId)
+]) <-
+  townPosition(ObjId, ImageId, X, Y).
+
+lpsDefineObject(FireObjId, image, [
+  position(X1, Y1),
+  size(32, 32),
+  image(fire),
+  zIndex(150),
+  isHidden(1)
+]) <-
+  townPosition(ObjId, _, X, Y),
+  atom_string(ObjId) != 'fireStation',
+  FireObjId = atom_string(ObjId) + 'Fire',
+  X1 = X + 16,
+  Y1 = Y + 16.
+
+flammable(I) <-
+  townPosition(I, _, _, _),
+  atom_string(I) != 'fireStation'.
+
+lpsDefineObject(_, rect, [
+  position(520, 332),
+  size(768, 20),
+  zIndex(-5),
+  strokeWeight(0),
+  fillStyle('#EDEDED')
+]).
+
+lpsDefineObject(_, rect, [
+  position(520, 350),
+  size(768, 20),
+  zIndex(-2),
+  strokeWeight(0),
+  fillStyle('#333')
+]).
+
+% neighbour(A, B) <-
+%   townPosition(A, _, X1, Y),
+%   townPosition(B, _, X2, Y),
+%   A != B,
+%   abs(X1 - X2) == 64.

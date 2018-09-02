@@ -1,0 +1,88 @@
+fluent(isFireTruckDeployed).
+action(fireTruckDeploy).
+action(fireTruckReturnToStation).
+action(fireTruckMove/2).
+actin(putOutFire/1).
+fluent(fireTruckPosition(X, Y)).
+
+lpsDefineObject(fireTruck, image, [
+  position(0, 0),
+  size(64, 64),
+  isHidden(1),
+  image(fireTruck),
+  zIndex(100)
+]).
+
+fire(_, T1),
+  not isFireTruckDeployed(T1) ->
+    fireTruckDeploy(T1, T2).
+
+fireTruckDeploy(T1, T2) ->
+  fireTruckPosition(X, Y, T2),
+  X1 = X + 16,
+  Y1 = Y + 16,
+  lpsUpdateObject(fireTruck, [
+    position(X1, Y1),
+    isHidden(0)
+  ]) from T2,
+  moveToFire from T2 to T3.
+
+selectFirstItem([H|_], S) <-
+  S = H.
+
+selectFire(I) at T <-
+  findall(I, fire(I), L),
+  selectFirstItem(L, I).
+
+moveToFire from T1 to T4 <-
+  selectFire(I) at T1,
+  writeln("Moving to fire at " + I),
+  fireTruckPosition(X, Y, T1),
+  townPosition(I, _, Tx, Ty),
+  NumCyclesNeeded = floor(abs(X - Tx) / 64),
+  T2 = T1 + NumCyclesNeeded,
+  cycleInterval(CT),
+  AnimationDuration = CT * NumCyclesNeeded,
+  handleTruckFlip(X, Tx) from T1,
+  lpsAnimateMoveObject(fireTruck, AnimationDuration, Tx + 16, Ty + 16) from T1,
+  fireTruckMove(Tx, Ty) from T2 to T3,
+  dealWithFire(I) from T2 to T4.
+
+moveToFire from T1 to T3 <-
+  not fire(_, T1),
+  writeln("Moving back to base"),
+  fireTruckPosition(X, Y, T1),
+  townPosition(fireStation, _, Tx, Ty),
+  NumCyclesNeeded = floor(abs(X - Tx) / 64),
+  T2 = T1 + NumCyclesNeeded,
+  cycleInterval(CT),
+  AnimationDuration = CT * NumCyclesNeeded,
+  handleTruckFlip(X, Tx) from T1,
+  lpsAnimateMoveObject(fireTruck, AnimationDuration, Tx + 16, Ty + 16) from T1,
+  fireTruckMove(Tx, Ty) from T2 to T3,
+  fireTruckReturnToStation from T2 to T3,
+  lpsHideObject(fireTruck) from T2.
+
+dealWithFire(I) from T1 to T4 <-
+  extinguish(I, T1, T2),
+  T3 = T1 + 8,
+  moveToFire from T3 to T4.
+
+handleTruckFlip(X1, X2) <-
+  X1 < X2,
+  lpsUpdateObject(fireTruck, [
+    flipHorizontal(0)
+  ]).
+
+handleTruckFlip(X1, X2) <-
+  X1 >= X2,
+  lpsUpdateObject(fireTruck, [
+    flipHorizontal(1)
+  ]).
+
+initiates(fireTruckDeploy, isFireTruckDeployed).
+initiates(fireTruckDeploy, fireTruckPosition(X, Y)) <-
+  townPosition(fireStation, _, X, Y).
+  % Y1 = Y + 32. % road starts slightly lower point
+updates(fireTruckMove(X, Y), fireTruckPosition(_, _), fireTruckPosition(X, Y)).
+terminates(fireTruckReturnToStation, isFireTruckDeployed).
