@@ -13,7 +13,7 @@ lpsLoadImage(circle, "./icons8-circle.png").
 
 p2pJoin(tictactoe).
 
-action(updateSelfIdentifier(A)).
+action(updateSelfIdentifier/1).
 action(showGridSquares).
 action(hideGridSquares).
 action(setOpponent/1).
@@ -51,30 +51,30 @@ showGridSquares(T1, T2),
   gridPositions(GridId, _, _),
   gridState(GridId, none, T2), % only show non-filled squares
   ObjId = 'gridSquare' + atom_string(GridId) ->
-    lpsShowObject(ObjId) from T2.
+    lpsShowObject(ObjId) from T3.
 
 hideGridSquares(T1, T2),
   gridPositions(GridId, _, _),
   ObjId = 'gridSquare' + atom_string(GridId) ->
-    lpsHideObject(ObjId) from T2.
+    lpsHideObject(ObjId) from T3.
 
 % another player is connected on the network
 % we make the second player to be "circle".
 % first player will remain as "cross"
 p2pPeerConnected(Network, Peer, T1, T2),
   not opponent(_, T2) ->
-    p2pSend(Network, Peer, newPlayer(circle)) from T2,
-    setOpponent(Peer, T2, T3),
-    startTurn(cross, T3, T4).
+    p2pSend(Network, Peer, newPlayer(circle)) from T2 to T4,
+    setOpponent(Peer, T4, T5),
+    startTurn(cross, T5, T6).
 
 % another player has already entered first
 % i will update my own identifier to what
 % the first player decided for me to be.
 p2pReceive(Network, Peer, newPlayer(Id), T1, T2),
   not opponent(_, T2) ->
-    updateSelfIdentifier(Id, T2, T3),
-    setOpponent(Peer, T2, T3),
-    startTurn(cross, T3, T4).
+    updateSelfIdentifier(Id) from T3 to T4,
+    setOpponent(Peer, T4, T5),
+    startTurn(cross, T5, T6).
 
 startTurn(Id, T1, T2) <-
   selfIdentifier(Id) at T1,
@@ -122,7 +122,7 @@ hasLost at T <-
 
 % check for a draw condition
 hasDrawn at T <-
-  not(gridState(_, none, T)).
+  not gridState(_, none, T).
 
 % checkGameStatus/1 will determine if the game
 % has met any of the end conditions, or otherwise
@@ -141,12 +141,12 @@ checkGameState(SelfId) from T1 to T1 <-
   ]),
   lpsHalt from T1.
 
-checkGameState(SelfId) from T1 to T1 <-
+checkGameState(SelfId) from T1 to T3 <-
   hasDrawn at T1,
   lpsUpdateObject(gameStatus, [
     caption('It is a draw.')
-  ]),
-  lpsHalt from T1.
+  ]) from T1 to T2,
+  lpsHalt from T2 to T3.
 
 % none of the end-game conditions have been met.
 % continue with the next turn
@@ -162,11 +162,11 @@ changeTurn(circle) from T1 to T2 <-
 
 showObjectOnGrid(ObjId, Id) at T1 <-
   lpsUpdateObject(ObjId, [
-    size(1, 1),
+    size(32, 32),
     image(Id),
     isHidden(0)
   ]) from T1,
-  lpsAnimateObject(ObjId, 400, [
+  lpsAnimateObject(ObjId, 120, [
     size(64, 64)
   ]) from T1.
 
@@ -175,22 +175,22 @@ updateGrid(ObjId, GridId, Id, T1, T2) <-
   setGridState(GridId, Id, T1, T2).
 
 % player makes a move
-lpsClick(Item, X, Y, T1, T2),
+lpsClick(Item, X, Y) from T1 to T2,
   selfIdentifier(Id) at T2,
   gridPositions(GridId, _, _),
   GridSquareId = 'gridSquare' + atom_string(GridId),
   atom_string(Item) == GridSquareId,
   ObjId = 'square' + atom_string(GridId),
   opponent(Peer) at T2 ->
-    p2pSend(tictactoe, Peer, move(ObjId, Id, GridId)) from T2,
-    updateGrid(ObjId, GridId, Id, T2, T3),
-    checkGameState(Id) from T3 to T4.
+    p2pSend(tictactoe, Peer, move(ObjId, Id, GridId)) from T2 to T3,
+    updateGrid(ObjId, GridId, Id, T3, T4),
+    checkGameState(Id) from T4 to T5.
 
 % a move has been made by the opponent,
 % we need to update the current player's world view
 p2pReceive(Network, Peer, move(ObjId, Id, GridId), T1, T2) ->
-  updateGrid(ObjId, GridId, Id, T2, T3),
-  checkGameState(Id) from T3 to T4.
+  updateGrid(ObjId, GridId, Id, T2, T4),
+  checkGameState(Id) from T4 to T5.
 
 % the game status to show the user
 lpsDefineObject(gameStatus, text, [
@@ -222,5 +222,6 @@ lpsDefineObject(winLine, line, [
   end(0, 0),
   strokeWeight(5),
   strokeStyle('#A00'),
-  isHidden(1)
+  isHidden(1),
+  zIndex(100)
 ]).

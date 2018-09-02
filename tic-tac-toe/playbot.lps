@@ -69,6 +69,6 @@ select(GridId, T1, T2),
   selfIdentifier(Id) at T2,
   ObjId = 'square' + atom_string(GridId),
   opponent(Peer) at T2 ->
-    p2pSend(tictactoe, Peer, move(ObjId, Id, GridId)) from T2,
-    updateGrid(ObjId, GridId, Id, T2, T3),
-    checkGameState(Id) from T3 to T4.
+    p2pSend(tictactoe, Peer, move(ObjId, Id, GridId)) from T3,
+    updateGrid(ObjId, GridId, Id, T3, T4),
+    checkGameState(Id) from T4 to T5.
