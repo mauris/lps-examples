@@ -36,7 +36,6 @@ selectFire(I) at T <-
 
 moveToFire from T1 to T4 <-
   selectFire(I) at T1,
-  writeln("Moving to fire at " + I),
   fireTruckPosition(X, Y, T1),
   townPosition(I, _, Tx, Ty),
   NumCyclesNeeded = floor(abs(X - Tx) / 64),
@@ -50,7 +49,6 @@ moveToFire from T1 to T4 <-
 
 moveToFire from T1 to T3 <-
   not fire(_, T1),
-  writeln("Moving back to base"),
   fireTruckPosition(X, Y, T1),
   townPosition(fireStation, _, Tx, Ty),
   NumCyclesNeeded = floor(abs(X - Tx) / 64),
