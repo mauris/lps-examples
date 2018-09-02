@@ -10,8 +10,8 @@ lpsDefineObject(_, text, [
 startTurn(Turn, T1, T2),
   selfIdentifier(Id, T2),
   atom_string(Turn) == atom_string(Id) ->
-    selectionStrategy(Choice) at T3,
-    select(Choice, T3, T4).
+    selectionStrategy(Choice) at T2,
+    select(Choice, T2, T3).
 
 % Actively tries to the opponent from winning
 % or move towards a win condition
@@ -39,6 +39,13 @@ selectionStrategy(Z) at T <-
 % bias for center
 selectionStrategy(4) at T <-
   gridState(4, none, T).
+
+selectionStrategy(X) at T <-
+  selfIdentifier(Id, T),
+  row(X, Y, Z),
+  gridState(X, none, T),
+  gridState(Y, Id, T),
+  gridState(Z, none, T).
 
 % bias for corners
 selectionStrategy(I) at T <-
@@ -69,6 +76,6 @@ select(GridId, T1, T2),
   selfIdentifier(Id) at T2,
   ObjId = 'square' + atom_string(GridId),
   opponent(Peer) at T2 ->
-    p2pSend(tictactoe, Peer, move(ObjId, Id, GridId)) from T3,
+    p2pSend(tictactoe, Peer, move(ObjId, Id, GridId)) from T2 to T3,
     updateGrid(ObjId, GridId, Id, T3, T4),
     checkGameState(Id) from T4 to T5.

@@ -1,7 +1,8 @@
 lpsDefineObject(ObjId, image, [
   position(X, Y),
   size(64, 64),
-  isHidden(1)
+  isHidden(1),
+  zIndex(10)
 ]) <-
   gridPositions(GridId, X, Y),
   ObjId = 'square' + atom_string(GridId).

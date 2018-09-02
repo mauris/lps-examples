@@ -166,7 +166,7 @@ showObjectOnGrid(ObjId, Id) at T1 <-
     image(Id),
     isHidden(0)
   ]) from T1,
-  lpsAnimateObject(ObjId, 120, [
+  lpsAnimateObject(ObjId, 160, [
     size(64, 64)
   ]) from T1.
 
