@@ -42,8 +42,8 @@ moveToFire from T1 to T4 <-
   T2 = T1 + NumCyclesNeeded,
   cycleInterval(CT),
   AnimationDuration = CT * NumCyclesNeeded,
-  handleTruckFlip(X, Tx) from T1,
-  lpsAnimateMoveObject(fireTruck, AnimationDuration, Tx + 16, Ty + 16) from T1,
+  handleTruckFlip(X, Tx) at T1,
+  lpsAnimateMoveObject(fireTruck, AnimationDuration, Tx + 16, Ty + 16) from T1 to T2,
   fireTruckMove(Tx, Ty) from T2 to T3,
   dealWithFire(I) from T2 to T4.
 
@@ -55,8 +55,8 @@ moveToFire from T1 to T3 <-
   T2 = T1 + NumCyclesNeeded,
   cycleInterval(CT),
   AnimationDuration = CT * NumCyclesNeeded,
-  handleTruckFlip(X, Tx) from T1,
-  lpsAnimateMoveObject(fireTruck, AnimationDuration, Tx + 16, Ty + 16) from T1,
+  handleTruckFlip(X, Tx) at T1,
+  lpsAnimateMoveObject(fireTruck, AnimationDuration, Tx + 16, Ty + 16) from T1 to T2,
   fireTruckMove(Tx, Ty) from T2 to T3,
   fireTruckReturnToStation from T2 to T3,
   lpsHideObject(fireTruck) from T2.
