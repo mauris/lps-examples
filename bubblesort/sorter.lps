@@ -1,0 +1,26 @@
+
+location(X, N1, T1),
+  location(Y, N1 + 1, T1),
+  not locked(X, T1),
+  not locked(Y, T1),
+  Y @< X ->
+    decideSwap(X, N1, Y, N1 + 1) from T1 to T2.
+
+% to swap
+decideSwap(X, N1, Y, N2) from T1 to T5 <-
+  location(X, N1, T1),
+  location(Y, N2, T1),
+  Y @< X,
+  lock(X, Y, T1, T2),
+  swap(X, N1, Y, N2, T2, T3),
+  T4 = T1 + 5,
+  unlock(X, Y, T4, T5).
+
+% or not to swap
+decideSwap(X, N1, Y, N2) from T to T <-
+  location(X, N1, T),
+  location(Y, N2, T),
+  X @< Y.
+
+% that is the question
+% William Shakespeare's Hamlet, Act III, Scene I

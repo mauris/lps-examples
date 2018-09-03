@@ -1,0 +1,72 @@
+consult('./main.lps').
+
+event(decideSwapLocation(I, X, Y)).
+
+locationScreen(1, 100, 100).
+locationScreen(2, 200, 100).
+locationScreen(3, 300, 100).
+locationScreen(4, 400, 100).
+locationScreen(5, 500, 100).
+locationScreen(6, 600, 100).
+
+lpsDefineObject(_, text, [
+  position(10, 20),
+  caption('Program authored by Sam Yong. Icons by Icons8.com, CC-BY-ND 3.0'),
+  font('9px Helvetica, sans-serif')
+]).
+
+lpsLoadImage(a, 'https://png.icons8.com/metro/64/a-lowercase.png').
+lpsLoadImage(b, 'https://png.icons8.com/metro/64/b-lowercase.png').
+lpsLoadImage(c, 'https://png.icons8.com/metro/64/c-lowercase.png').
+lpsLoadImage(d, 'https://png.icons8.com/metro/64/d-lowercase.png').
+lpsLoadImage(e, 'https://png.icons8.com/metro/64/e-lowercase.png').
+lpsLoadImage(f, 'https://png.icons8.com/metro/64/f-lowercase.png').
+
+lpsDefineObject(Item, image, [
+  image(Item),
+  size(64, 64),
+  position(-32, -32)
+]) <-
+  lpsLoadImage(Item, _).
+
+location(Item, Loc, 1) ->
+  locationScreen(Loc, X, Y),
+  lpsUpdateObject(Item, [
+    position(X, Y)
+  ]) from 1 to T2.
+
+swap(A, J, B, K, T1, T2) ->
+  locationScreen(J, X1, Y1),
+  locationScreen(K, X2, Y2),
+  lpsAnimateMoveObject(A, 400, X2, Y2) from T2,
+  lpsAnimateMoveObject(B, 400, X1, Y1) from T2.
+
+lpsMouseDown(I, X, Y, T1, T2),
+  not locked(I, T2) ->
+    lpsUpdateObject(I, [
+      isDragEnabled(1)
+    ]).
+
+lpsDragRelease(I, X, Y, T1, T2) ->
+  decideSwapLocation(I, X, Y, T2, T3).
+
+nearestOtherLocation(X, Y, OtherLoc) <-
+  locationScreen(OtherLoc, SX, SY),
+  abs(SX - X) < 60,
+  abs(SY - Y) < 60.
+
+decideSwapLocation(Item, X, Y, T1, T5) <-
+  nearestOtherLocation(X, Y, OtherLoc),
+  location(OtherItem, OtherLoc) at T1,
+  OtherItem != Item,
+  location(Item, Loc) at T1,
+  lock(Item, OtherItem, T1, T2),
+  swap(Item, Loc, OtherItem, OtherLoc, T2, T3),
+  T4 = T1 + 5,
+  unlock(Item, OtherItem, T4, T5).
+
+decideSwapLocation(Item, X, Y, T1, T2) <-
+  T2 = T1 + 6,
+  location(Item, Loc, T1),
+  locationScreen(Loc, SX, SY),
+  lpsAnimateMoveObject(Item, 200, SX, SY) at T2.
